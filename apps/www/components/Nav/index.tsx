@@ -22,6 +22,8 @@ import HamburgerButton from './HamburgerMenu'
 import MenuItem from './MenuItem'
 import MobileMenu from './MobileMenu'
 import RightClickBrandLogo from './RightClickBrandLogo'
+import { ThemeToggle } from 'ui-patterns/ThemeToggle'
+import useDarkLaunchWeeks from '../../hooks/useDarkLaunchWeeks'
 
 interface Props {
   hideNavbar: boolean
@@ -42,6 +44,9 @@ const Nav = ({ hideNavbar, stickyNavbar = true }: Props) => {
   const isGAWeekSection = router.pathname.startsWith('/ga-week')
   const disableStickyNav = isLaunchWeekXPage || isGAWeekSection || isLaunchWeekPage || !stickyNavbar
   const showLaunchWeekNavMode = (isLaunchWeekPage || isGAWeekSection) && !open
+
+  const isDarkLaunchWeek = useDarkLaunchWeeks()
+  const forceDark = isDarkLaunchWeek
 
   React.useEffect(() => {
     if (open) {
@@ -141,6 +146,9 @@ const Nav = ({ hideNavbar, stickyNavbar = true }: Props) => {
                     </Button>
                   </>
                 )}
+                <div className={cn(forceDark && 'hidden')}>
+                  <ThemeToggle forceDark={forceDark} />
+                </div>
               </div>
             </div>
             <HamburgerButton
