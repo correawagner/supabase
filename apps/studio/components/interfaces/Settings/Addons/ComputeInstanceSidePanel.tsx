@@ -25,7 +25,6 @@ import { getCloudProviderArchitecture } from 'lib/cloudprovider-utils'
 import { INSTANCE_MICRO_SPECS, PROJECT_STATUS } from 'lib/constants'
 import { useAddonsPagePanel } from 'state/addons-page'
 import {
-  Alert,
   Alert_Shadcn_,
   AlertDescription_Shadcn_,
   AlertTitle_Shadcn_,
@@ -39,6 +38,7 @@ import {
   TooltipTrigger_Shadcn_,
   WarningIcon,
 } from 'ui'
+import { Admonition } from 'ui-patterns'
 
 const ComputeInstanceSidePanel = () => {
   const queryClient = useQueryClient()
@@ -275,21 +275,20 @@ const ComputeInstanceSidePanel = () => {
 
             <div className="pb-4">
               {isFreePlan && (
-                <Alert
-                  withIcon
+                <Admonition
                   className="mb-4"
-                  variant="info"
+                  type="tip"
                   title="Changing your compute size is only available on the Pro Plan"
-                  actions={
+                >
+                  Upgrade your plan to change the compute size of your project
+                  <div className="mt-2">
                     <Button asChild type="default">
                       <Link href={`/org/${organization?.slug}/billing?panel=subscriptionPlan`}>
                         View available plans
                       </Link>
                     </Button>
-                  }
-                >
-                  Upgrade your plan to change the compute size of your project
-                </Alert>
+                  </div>
+                </Admonition>
               )}
               <Radio.Group
                 type="large-cards"
@@ -456,13 +455,12 @@ const ComputeInstanceSidePanel = () => {
         header="Confirm to upgrade compute instance now"
       >
         <Modal.Content>
-          <Alert
-            withIcon
-            variant="warning"
+          <Admonition
+            type="warning"
             title="Your project will need to be restarted when changing its compute size"
           >
             Your project will be unavailable for up to 2 minutes while the changes take place.
-          </Alert>
+          </Admonition>
         </Modal.Content>
       </Modal>
     </>

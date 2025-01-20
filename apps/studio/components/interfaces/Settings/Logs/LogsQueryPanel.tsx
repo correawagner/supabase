@@ -9,7 +9,6 @@ import { copyToClipboard } from 'lib/helpers'
 import { BookOpen, Check, ChevronDown, Clipboard, ExternalLink, X } from 'lucide-react'
 import { logConstants } from 'shared-data'
 import {
-  Alert,
   Badge,
   Button,
   DropdownMenu,
@@ -31,6 +30,7 @@ import {
 import DatePickers from './Logs.DatePickers'
 import { LogsWarning, LogTemplate, WarehouseCollection } from './Logs.types'
 import { WarehouseQueryTemplate } from './Warehouse.utils'
+import { Admonition } from 'ui-patterns'
 
 export type SourceType = 'logs' | 'warehouse'
 export interface LogsQueryPanelProps {
@@ -222,7 +222,7 @@ const LogsQueryPanel = ({
               >
                 <Popover
                   overlay={
-                    <Alert variant="warning" title="">
+                    <Admonition type="warning" title="">
                       <div className="flex flex-col gap-3">
                         {warnings.map((warning, index) => (
                           <p key={index}>
@@ -233,7 +233,7 @@ const LogsQueryPanel = ({
                           </p>
                         ))}
                       </div>
-                    </Alert>
+                    </Admonition>
                   }
                 >
                   <Badge variant="warning">
