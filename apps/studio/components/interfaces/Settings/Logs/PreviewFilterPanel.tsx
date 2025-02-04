@@ -9,7 +9,7 @@ import CSVButton from 'components/ui/CSVButton'
 import DatabaseSelector from 'components/ui/DatabaseSelector'
 import { useLoadBalancersQuery } from 'data/read-replicas/load-balancers-query'
 import { Button, Input, Tooltip, TooltipContent, TooltipTrigger, cn } from 'ui'
-import DatePickers from './Logs.DatePickers'
+import { DatePickerValue, LogsDatePicker } from './Logs.DatePickers'
 import {
   FILTER_OPTIONS,
   LOG_ROUTES_WITH_REPLICA_SUPPORT,
@@ -18,6 +18,7 @@ import {
 } from './Logs.constants'
 import type { Filters, LogSearchCallback, LogTemplate } from './Logs.types'
 import LogsFilterPopover from './LogsFilterPopover'
+import dayjs from 'dayjs'
 
 interface PreviewFilterPanelProps {
   defaultSearchValue?: string
@@ -51,8 +52,6 @@ const PreviewFilterPanel = ({
   onRefresh,
   onSearch = () => {},
   defaultSearchValue = '',
-  defaultToValue = '',
-  defaultFromValue = '',
   onExploreClick,
   queryUrl,
   condensedLayout,
@@ -117,9 +116,29 @@ const PreviewFilterPanel = ({
     </Tooltip>
   )
 
-  const handleDatepickerChange = ({ to, from }: Partial<Parameters<LogSearchCallback>[1]>) => {
-    onSearch('datepicker-change', { to, from })
+  function getDefaultDatePickerValue() {
+    // if we have values in the URL, use them
+    const iso_timestamp_start = router.query.iso_timestamp_start as string
+    const iso_timestamp_end = router.query.iso_timestamp_end as string
+    if (iso_timestamp_start && iso_timestamp_end) {
+      return {
+        to: iso_timestamp_end,
+        from: iso_timestamp_start,
+        text: `${dayjs(iso_timestamp_start).format('DD MMM, HH:mm')} - ${dayjs(iso_timestamp_end).format('DD MMM, HH:mm')}`,
+        isHelper: false,
+      }
+    }
+    return {
+      to: PREVIEWER_DATEPICKER_HELPERS[2].calcTo(),
+      from: PREVIEWER_DATEPICKER_HELPERS[2].calcFrom(),
+      text: 'Last hour',
+      isHelper: true,
+    }
   }
+
+  const [selectedDatePickerValue, setSelectedDatePickerValue] = useState<DatePickerValue>(
+    getDefaultDatePickerValue()
+  )
 
   const handleInputSearch = (query: string) => onSearch('search-input-change', { query })
 
@@ -182,12 +201,13 @@ const PreviewFilterPanel = ({
         </form>
 
         <RefreshButton />
-
-        <DatePickers
-          onChange={handleDatepickerChange}
-          to={defaultToValue}
-          from={defaultFromValue}
+        <LogsDatePicker
           helpers={PREVIEWER_DATEPICKER_HELPERS}
+          onSubmit={(vals) => {
+            onSearch('datepicker-change', { to: vals.to, from: vals.from })
+            setSelectedDatePickerValue(vals)
+          }}
+          value={selectedDatePickerValue}
         />
 
         {FILTER_OPTIONS[table] !== undefined && (
