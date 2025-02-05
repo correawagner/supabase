@@ -1,7 +1,15 @@
 import { Fragment, useState } from 'react'
 
-import { Button, Checkbox, Form, Popover } from 'ui'
-import type { FilterSet, Filters } from './Logs.types'
+import {
+  Button,
+  Checkbox,
+  Form,
+  Popover_Shadcn_,
+  PopoverContent_Shadcn_,
+  PopoverSeparator_Shadcn_,
+  PopoverTrigger_Shadcn_,
+} from 'ui'
+import type { Filters, FilterSet } from './Logs.types'
 
 interface LogsFilterPopoverProps {
   options: FilterSet
@@ -32,13 +40,18 @@ const LogsFilterPopover = ({
   }
 
   return (
-    <Popover
-      className="flex items-center"
-      open={open}
-      align="end"
-      size="medium"
-      onOpenChange={handleToggle}
-      overlay={
+    <Popover_Shadcn_ open={open} onOpenChange={setOpen}>
+      <PopoverTrigger_Shadcn_ asChild>
+        <Button
+          asChild
+          type={checkIsActive() ? 'secondary' : 'default'}
+          onClick={handleToggle}
+          className={buttonClassName}
+        >
+          <span>{options.label}</span>
+        </Button>
+      </PopoverTrigger_Shadcn_>
+      <PopoverContent_Shadcn_ className="p-0 w-60" align="end" side="bottom">
         <Form
           className="w-full"
           initialValues={filters}
@@ -62,7 +75,7 @@ const LogsFilterPopover = ({
                       size="medium"
                       defaultChecked={(filters?.[options.key] as Filters)?.[x.key] as boolean}
                     />
-                    {i !== options.options.length - 1 && <Popover.Separator />}
+                    {i !== options.options.length - 1 && <PopoverSeparator_Shadcn_ />}
                   </Fragment>
                 ))}
               </div>
@@ -77,19 +90,8 @@ const LogsFilterPopover = ({
             </>
           )}
         </Form>
-      }
-      showClose
-      side="bottom"
-    >
-      <Button
-        asChild
-        type={checkIsActive() ? 'secondary' : 'default'}
-        onClick={handleToggle}
-        className={buttonClassName}
-      >
-        <span>{options.label}</span>
-      </Button>
-    </Popover>
+      </PopoverContent_Shadcn_>
+    </Popover_Shadcn_>
   )
 }
 

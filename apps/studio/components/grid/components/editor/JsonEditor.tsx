@@ -11,7 +11,15 @@ import { useGetCellValueMutation } from 'data/table-rows/get-cell-value-mutation
 import { MAX_CHARACTERS } from 'data/table-rows/table-rows-query'
 import { useSelectedProject } from 'hooks/misc/useSelectedProject'
 import { prettifyJSON, removeJSONTrailingComma, tryParseJson } from 'lib/helpers'
-import { Popover, Tooltip, TooltipContent, TooltipTrigger } from 'ui'
+import {
+  cn,
+  Popover_Shadcn_,
+  PopoverContent_Shadcn_,
+  PopoverTrigger_Shadcn_,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from 'ui'
 import { BlockKeys } from '../common/BlockKeys'
 import { MonacoEditor } from '../common/MonacoEditor'
 import { NullValue } from '../common/NullValue'
@@ -62,8 +70,6 @@ export const JsonEditor = <TRow, TSummaryRow = unknown>({
     connectionString: project?.connectionString,
     id,
   })
-
-  const gridColumn = state.gridColumns.find((x) => x.name == column.key)
 
   const rawInitialValue = row[column.key as keyof TRow] as unknown
   const initialValue =
@@ -157,31 +163,32 @@ export const JsonEditor = <TRow, TSummaryRow = unknown>({
   }
 
   return (
-    <Popover
-      open={isPopoverOpen}
-      side="bottom"
-      align="start"
-      sideOffset={-35}
-      className="rounded-none"
-      overlay={
-        isTruncated && !isSuccess ? (
-          <div
-            style={{ width: `${gridColumn?.width || column.width}px` }}
-            className="flex items-center justify-center flex-col relative"
-          >
-            <MonacoEditor
-              readOnly
-              onChange={() => {}}
-              width={`${gridColumn?.width || column.width}px`}
-              value={value ?? ''}
-              language="markdown"
-            />
+    <Popover_Shadcn_ open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+      <PopoverTrigger_Shadcn_ asChild>
+        <div
+          className={cn(
+            !!value && jsonString.trim().length == 0 ? 'sb-grid-fill-container' : '',
+            'sb-grid-json-editor__trigger w-full'
+          )}
+        >
+          {value === null || value === '' ? <NullValue /> : jsonString}
+        </div>
+      </PopoverTrigger_Shadcn_>
+      <PopoverContent_Shadcn_
+        side="bottom"
+        align="start"
+        sideOffset={-35}
+        className="rounded-none p-0 min-w-[166px]"
+        sameWidthAsTrigger
+      >
+        {isTruncated && !isSuccess ? (
+          <div className="flex items-center justify-center flex-col relative">
+            <MonacoEditor readOnly onChange={() => {}} value={value ?? ''} language="markdown" />
             <TruncatedWarningOverlay isLoading={isLoading} loadFullValue={loadFullValue} />
           </div>
         ) : (
           <BlockKeys value={value} onEscape={cancelChanges} onEnter={saveChanges}>
             <MonacoEditor
-              width={`${gridColumn?.width || column.width}px`}
               value={value ?? ''}
               language="json"
               readOnly={!isEditable}
@@ -191,13 +198,13 @@ export const JsonEditor = <TRow, TSummaryRow = unknown>({
               {isEditable && (
                 <div className="space-y-1">
                   <div className="flex items-center space-x-2">
-                    <div className="px-1.5 py-[2.5px] rounded bg-selection border border-strong flex items-center justify-center">
+                    <div className="px-1.5 py-[2.5px] rounded bg-selection border border-strong flex items-center justify-center h-[22px]">
                       <span className="text-[10px]">⏎</span>
                     </div>
                     <p className="text-xs text-foreground-light">Save changes</p>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <div className="px-1 py-[2.5px] rounded bg-selection border border-strong flex items-center justify-center">
+                    <div className="px-1 py-[2.5px] rounded bg-selection border border-strong flex items-center justify-center h-[22px]">
                       <span className="text-[10px]">Esc</span>
                     </div>
                     <p className="text-xs text-foreground-light">Cancel changes</p>
@@ -222,17 +229,8 @@ export const JsonEditor = <TRow, TSummaryRow = unknown>({
               </Tooltip>
             </div>
           </BlockKeys>
-        )
-      }
-    >
-      <div
-        className={`${
-          !!value && jsonString.trim().length == 0 ? 'sb-grid-fill-container' : ''
-        } sb-grid-json-editor__trigger`}
-        onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-      >
-        {value === null || value === '' ? <NullValue /> : jsonString}
-      </div>
-    </Popover>
+        )}
+      </PopoverContent_Shadcn_>
+    </Popover_Shadcn_>
   )
 }
