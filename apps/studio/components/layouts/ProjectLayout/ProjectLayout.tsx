@@ -1,4 +1,5 @@
 import { useParams } from 'common'
+import { useFeaturePreviewContext } from 'components/interfaces/App/FeaturePreview/FeaturePreviewContext'
 import ProjectAPIDocs from 'components/interfaces/ProjectAPIDocs/ProjectAPIDocs'
 import { AIAssistantPanel } from 'components/ui/AIAssistantPanel/AIAssistantPanel'
 import AISettingsModal from 'components/ui/AISettingsModal'
@@ -8,7 +9,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useSelectedOrganization } from 'hooks/misc/useSelectedOrganization'
 import { useSelectedProject } from 'hooks/misc/useSelectedProject'
 import { withAuth } from 'hooks/misc/withAuth'
-import { PROJECT_STATUS } from 'lib/constants'
+import { LOCAL_STORAGE_KEYS, PROJECT_STATUS } from 'lib/constants'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { forwardRef, Fragment, PropsWithChildren, ReactNode, useEffect, useState } from 'react'
@@ -17,6 +18,7 @@ import { useDatabaseSelectorStateSnapshot } from 'state/database-selector'
 import { cn, ResizableHandle, ResizablePanel, ResizablePanelGroup } from 'ui'
 import MobileSheetNav from 'ui-patterns/MobileSheetNav/MobileSheetNav'
 import EnableBranchingModal from '../AppLayout/EnableBranchingButton/EnableBranchingModal'
+import { useEditorType } from '../editors/EditorsLayout.hooks'
 import BuildingState from './BuildingState'
 import ConnectingState from './ConnectingState'
 import LoadingState from './LoadingState'
@@ -24,7 +26,6 @@ import { ProjectPausedState } from './PausedState/ProjectPausedState'
 import PauseFailedState from './PauseFailedState'
 import PausingState from './PausingState'
 import ProductMenuBar from './ProductMenuBar'
-import { ProjectContextProvider } from './ProjectContext'
 import { ResizingState } from './ResizingState'
 import RestartingState from './RestartingState'
 import RestoreFailedState from './RestoreFailedState'
@@ -92,6 +93,15 @@ const ProjectLayout = forwardRef<HTMLDivElement, PropsWithChildren<ProjectLayout
     const { aiAssistantPanel, setAiAssistantPanel, mobileMenuOpen, setMobileMenuOpen } =
       useAppStateSnapshot()
     const { open } = aiAssistantPanel
+
+    // tabs preview flag logic
+    const editor = useEditorType()
+    const { flags } = useFeaturePreviewContext()
+    const tableEditorTabsEnabled =
+      editor === 'table' && !flags[LOCAL_STORAGE_KEYS.UI_TABLE_EDITOR_TABS]
+    const sqlEditorTabsEnabled = editor === 'sql' && !flags[LOCAL_STORAGE_KEYS.UI_SQL_EDITOR_TABS]
+    const forceShowProductMenu = tableEditorTabsEnabled && !sqlEditorTabsEnabled
+    // end of tabs preview flag logic
 
     const projectName = selectedProject?.name
     const organizationName = selectedOrganization?.name
