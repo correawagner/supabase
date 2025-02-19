@@ -62,6 +62,7 @@ const MemoizedQueryBlock = memo(
     isLoading,
     isDraggable,
     runQuery,
+    logs,
     onRunQuery,
     onDragStart,
     onUpdateChartConfig,
@@ -74,6 +75,7 @@ const MemoizedQueryBlock = memo(
     isLoading: boolean
     isDraggable: boolean
     runQuery: boolean
+    logs?: boolean
     onRunQuery: (queryType: 'select' | 'mutation') => void
     onDragStart: (e: DragEvent<Element>) => void
     onUpdateChartConfig?: ({
@@ -97,6 +99,7 @@ const MemoizedQueryBlock = memo(
         lockColumns
         label={title}
         sql={sql}
+        logs={logs}
         chartConfig={{
           type: 'bar',
           cumulative: false,
@@ -162,6 +165,7 @@ export const MarkdownPre = ({ children }: { children: any }) => {
   const title = snippetProps.title || (language === 'edge' ? 'Edge Function' : 'SQL Query')
   const isChart = snippetProps.isChart === 'true'
   const runQuery = snippetProps.runQuery === 'true'
+  const isLogs = snippetProps.logs === 'true'
 
   // Strip props from the content for both SQL and edge functions
   const cleanContent = rawContent.replace(/(?:--|\/\/)\s*props:\s*\{[^}]+\}/, '').trim()
@@ -213,6 +217,7 @@ export const MarkdownPre = ({ children }: { children: any }) => {
             isLoading={isLoading}
             isDraggable={isDraggableToReports}
             runQuery={runQuery}
+            logs={isLogs}
             onRunQuery={onRunQuery}
             onUpdateChartConfig={({ chartConfig: config }) => {
               chartConfig.current = { ...chartConfig.current, ...config }
@@ -220,7 +225,12 @@ export const MarkdownPre = ({ children }: { children: any }) => {
             onDragStart={(e: DragEvent<Element>) => {
               e.dataTransfer.setData(
                 'application/json',
-                JSON.stringify({ label: title, sql: cleanContent, config: chartConfig.current })
+                JSON.stringify({
+                  label: title,
+                  sql: cleanContent,
+                  isLogs,
+                  config: chartConfig.current,
+                })
               )
             }}
           />

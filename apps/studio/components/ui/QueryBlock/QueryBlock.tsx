@@ -1,7 +1,7 @@
-import { Code, Play } from 'lucide-react'
+import { Code, ExternalLink, Play } from 'lucide-react'
 import { DragEvent, ReactNode, useEffect, useMemo, useState } from 'react'
 import { Bar, BarChart, CartesianGrid, XAxis } from 'recharts'
-import { toast } from 'sonner'
+import Link from 'next/link'
 
 import { useParams } from 'common'
 import { ReportBlockContainer } from 'components/interfaces/Reports/ReportBlock/ReportBlockContainer'
@@ -9,6 +9,7 @@ import { ChartConfig } from 'components/interfaces/SQLEditor/UtilityPanel/ChartC
 import Results from 'components/interfaces/SQLEditor/UtilityPanel/Results'
 import { useProjectContext } from 'components/layouts/ProjectLayout/ProjectContext'
 import { useExecuteSqlMutation } from 'data/sql/execute-sql-mutation'
+import useLogsQuery from 'hooks/analytics/useLogsQuery'
 import { Parameter, parseParameters } from 'lib/sql-parameters'
 import { Dashboards } from 'types'
 import {
@@ -60,6 +61,8 @@ interface QueryBlockProps {
   isLoading?: boolean
   /** Override to prevent running the SQL query provided */
   runQuery?: boolean
+  /** Whether this is a logs query */
+  logs?: boolean
   /** Prevent updating of columns for X and Y axes in the chart view */
   lockColumns?: boolean
   /** Max height set to render results / charts (Defaults to 250) */
@@ -109,6 +112,7 @@ export const QueryBlock = ({
   isChart = false,
   isLoading = false,
   runQuery = false,
+  logs = false,
   lockColumns = false,
   draggable = false,
   isRefreshing = false,
@@ -139,9 +143,36 @@ export const QueryBlock = ({
   // const combinedParameterValues = { ...extParameterValues, ...parameterValues }
   const isReadOnlySelectSQL = isReadOnlySelect(sql ?? '')
 
-  const { mutate: execute, isLoading: isExecuting } = useExecuteSqlMutation({
+  const {
+    mutate: execute,
+    isLoading: isExecuting,
+    error: sqlError,
+  } = useExecuteSqlMutation({
     onSuccess: (data) => setQueryResult(data.result),
   })
+
+  const {
+    params,
+    logData,
+    error: logsError,
+    isLoading: isLoadingLogs,
+    runQuery: runLogsQuery,
+  } = useLogsQuery(
+    ref || '',
+    {
+      sql: sql || '',
+    },
+    logs && runQuery && Boolean(ref)
+  )
+
+  const error = logs ? logsError : sqlError
+  const errorMessage = error
+    ? typeof error === 'string'
+      ? error
+      : Array.isArray((error as any)?.error)
+        ? (error as any).error[0]?.message
+        : (error as any)?.message ?? 'An error occurred'
+    : undefined
 
   const handleExecute = () => {
     if (!sql || isLoading) return
@@ -152,15 +183,17 @@ export const QueryBlock = ({
     }
 
     try {
-      // [Joshen] This is for when we introduced the concept of parameters into our reports
-      // const processedSql = processParameterizedSql(sql, combinedParameterValues)
-      execute({
-        projectRef: ref,
-        connectionString: project?.connectionString,
-        sql,
-      })
+      if (logs) {
+        runLogsQuery()
+      } else {
+        execute({
+          projectRef: ref,
+          connectionString: project?.connectionString,
+          sql,
+        })
+      }
     } catch (error: any) {
-      toast.error(`Failed to execute query: ${error.message}`)
+      console.error(error.message)
     }
   }
 
@@ -168,21 +201,29 @@ export const QueryBlock = ({
     setChartSettings(chartConfig)
   }, [chartConfig])
 
+  // Monitor the logData and set the queryResult
+  useEffect(() => {
+    if (logs && logData && !isLoading) {
+      setQueryResult(logData)
+    }
+  }, [logData, isLoading])
+
   // Run once on mount to parse parameters and notify parent
   useEffect(() => {
     if (!!sql && onSetParameter) {
       const params = parseParameters(sql)
       onSetParameter(params)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sql])
+  }, [sql, onSetParameter])
 
   useEffect(() => {
-    if (!!sql && !isLoading && runQuery && isReadOnlySelect(sql) && !!project) {
+    const shouldExecute = !!sql && !isLoading && !isLoadingLogs && runQuery && !!project
+    const isValidQuery = isReadOnlySelect(sql ?? '')
+
+    if (shouldExecute && isValidQuery) {
       handleExecute()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sql, isLoading, runQuery, project])
+  }, [sql, isLoading, isLoadingLogs, runQuery, project?.connectionString])
 
   useEffect(() => {
     if (isRefreshing) handleExecute()
@@ -190,10 +231,10 @@ export const QueryBlock = ({
 
   return (
     <ReportBlockContainer
-      draggable={draggable}
+      draggable={!logs && draggable}
       showDragHandle={draggable}
       tooltip={tooltip}
-      loading={isExecuting}
+      loading={isExecuting || isLoadingLogs}
       onDragStart={(e: DragEvent<Element>) => onDragStart?.(e)}
       icon={
         <SQL_ICON
@@ -249,7 +290,26 @@ export const QueryBlock = ({
             </>
           )}
 
-          <EditQueryButton id={id} title={label} sql={sql} />
+          {logs && sql ? (
+            <ButtonTooltip
+              type="text"
+              size="tiny"
+              className="w-7 h-7"
+              icon={<ExternalLink size={14} />}
+              asChild
+              tooltip={{
+                content: { side: 'bottom', text: 'Open in Logs Explorer' },
+              }}
+            >
+              <Link
+                href={`/project/${ref}/logs/explorer?q=${encodeURIComponent(sql)}&its=${encodeURIComponent(
+                  params?.iso_timestamp_start || ''
+                )}&ite=${encodeURIComponent(params?.iso_timestamp_end || '')}`}
+              />
+            </ButtonTooltip>
+          ) : (
+            <EditQueryButton id={id} title={label} sql={sql} />
+          )}
 
           {(isReadOnlySelectSQL || (!isReadOnlySelectSQL && !disableRunIfMutation)) && (
             <ButtonTooltip
@@ -257,7 +317,7 @@ export const QueryBlock = ({
               size="tiny"
               className="w-7 h-7"
               icon={<Play size={14} />}
-              loading={isExecuting || isLoading}
+              loading={isExecuting || isLoadingLogs || isLoading}
               disabled={isLoading}
               onClick={() => {
                 handleExecute()
@@ -314,11 +374,15 @@ export const QueryBlock = ({
                 // const processedSql = processParameterizedSql(sql!, combinedParameterValues)
                 if (sql) {
                   setShowWarning(undefined)
-                  execute({
-                    projectRef: ref,
-                    connectionString: project?.connectionString,
-                    sql,
-                  })
+                  if (logs) {
+                    runLogsQuery()
+                  } else {
+                    execute({
+                      projectRef: ref,
+                      connectionString: project?.connectionString,
+                      sql,
+                    })
+                  }
                   onRunQuery?.('mutation')
                 }
               }}
@@ -401,7 +465,12 @@ export const QueryBlock = ({
         </>
       ) : (
         <>
-          {queryResult ? (
+          {error ? (
+            <Admonition type="danger" className="mb-0 rounded-none border-0">
+              <p>Failed to execute {logs ? 'logs' : 'SQL'} query</p>
+              <p className="text-foreground-light">{errorMessage}</p>
+            </Admonition>
+          ) : queryResult ? (
             <div
               className={cn('flex-1 w-full overflow-auto relative')}
               style={{ maxHeight: maxHeight ? `${maxHeight}px` : undefined }}
