@@ -86,6 +86,7 @@ export const LOCAL_STORAGE_KEYS = {
   // Used for allowing the main nav panel to expand on hover
   EXPAND_NAVIGATION_PANEL: 'supabase-expand-navigation-panel',
   GITHUB_AUTHORIZATION_STATE: 'supabase-github-authorization-state',
+  GITLAB_AUTHORIZATION_STATE: 'supabase-gitlab-authorization-state',
   // Notice banner keys
   FLY_POSTGRES_DEPRECATION_WARNING: 'fly-postgres-deprecation-warning-dismissed',
 

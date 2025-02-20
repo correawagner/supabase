@@ -901,6 +901,77 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/platform/integrations/gitlab/authorization': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get GitLab authorization */
+    get: operations['GitLabAuthorizationsController_getGitLabAuthorization']
+    put?: never
+    /** Create GitLab authorization */
+    post: operations['GitLabAuthorizationsController_createGitLabAuthorization']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/platform/integrations/gitlab/connections': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** List organization GitLab connections */
+    get: operations['GitLabConnectionsController_listOrganizationGitLabConnections']
+    put?: never
+    /** Connects a GitLab project to a supabase project */
+    post: operations['GitLabConnectionsController_createGitLabConnection']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/platform/integrations/gitlab/connections/{connection_id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    /** Deletes GitLab project connection */
+    delete: operations['GitLabConnectionsController_deleteGitLabConnection']
+    options?: never
+    head?: never
+    /** Updates a GitLab connection for a supabase project */
+    patch: operations['GitLabConnectionsController_updateGitHubConnection']
+    trace?: never
+  }
+  '/platform/integrations/gitlab/repositories': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Gets GitLab repositories for user */
+    get: operations['GitLabRepositoriesController_listRepositories']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/platform/integrations/vercel': {
     parameters: {
       query?: never
@@ -8512,6 +8583,13 @@ export interface components {
       project_ref: string
       repository_id: number
     }
+    CreateGitLabAuthorizationBody: {
+      code: string
+    }
+    CreateGitLabConnectionsBody: {
+      project_ref: string
+      repository_id: number
+    }
     CreateInvitationBody: {
       email: string
       role_id: number
@@ -9414,6 +9492,11 @@ export interface components {
       sender_id: number
       user_id: number
     }
+    GitLabAuthorization: {
+      id: number
+      sender_id: number
+      user_id: number
+    }
     GoTrueConfigResponse: {
       API_MAX_REQUEST_DURATION: number | null
       DB_MAX_POOL_SIZE: number | null
@@ -9738,6 +9821,34 @@ export interface components {
       connections: components['schemas']['ListGitHubConnectionsConnection'][]
     }
     ListGitHubConnectionsUser: {
+      id: number
+      primary_email: string | null
+      username: string
+    }
+    ListGitLabConnectionsConnection: {
+      branch_limit: number
+      id: number
+      inserted_at: string
+      project: components['schemas']['ListGitLabConnectionsProject']
+      repository: components['schemas']['ListGitLabConnectionsRepository']
+      supabase_changes_only: boolean
+      updated_at: string
+      user: components['schemas']['ListGitLabConnectionsUser'] | null
+      workdir: string
+    }
+    ListGitLabConnectionsProject: {
+      id: number
+      name: string
+      ref: string
+    }
+    ListGitLabConnectionsRepository: {
+      id: number
+      name: string
+    }
+    ListGitLabConnectionsResponse: {
+      connections: components['schemas']['ListGitLabConnectionsConnection'][]
+    }
+    ListGitLabConnectionsUser: {
       id: number
       primary_email: string | null
       username: string
@@ -11737,6 +11848,11 @@ export interface components {
       security_definer?: boolean
     }
     UpdateGitHubConnectionsBody: {
+      branch_limit?: number
+      supabase_changes_only?: boolean
+      workdir?: string
+    }
+    UpdateGitLabConnectionsBody: {
       branch_limit?: number
       supabase_changes_only?: boolean
       workdir?: string
@@ -14408,6 +14524,196 @@ export interface operations {
         content?: never
       }
       /** @description Failed to get GitHub repositories for user */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  GitLabAuthorizationsController_getGitLabAuthorization: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['GitLabAuthorization']
+        }
+      }
+      /** @description Failed to get GitLab authorization */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  GitLabAuthorizationsController_createGitLabAuthorization: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateGitLabAuthorizationBody']
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Failed to create GitLab authorization */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  GitLabConnectionsController_listOrganizationGitLabConnections: {
+    parameters: {
+      query: {
+        organization_id: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ListGitLabConnectionsResponse']
+        }
+      }
+      /** @description Failed to list organization GitLab connections */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  GitLabConnectionsController_createGitLabConnection: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateGitLabConnectionsBody']
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Failed to create project connections */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  GitLabConnectionsController_deleteGitLabConnection: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        connection_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Failed to delete GitLab integration project connection */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  GitLabConnectionsController_updateGitHubConnection: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        connection_id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateGitLabConnectionsBody']
+      }
+    }
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Failed to update GitLab connection */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  GitLabRepositoriesController_listRepositories: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Failed to get GitLab repositories for user */
       500: {
         headers: {
           [name: string]: unknown

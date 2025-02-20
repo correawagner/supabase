@@ -262,6 +262,11 @@ export type GitHubConnectionCreateVariables = {
   connection: components['schemas']['CreateGitHubConnectionsBody']
 }
 
+export type GitLabConnectionCreateVariables = {
+  organizationId: number
+  connection: components['schemas']['CreateGitLabConnectionsBody']
+}
+
 export type EnvironmentTargets = 'production' | 'preview' | 'development'
 
 export type UpdateConnectionPayload = {
