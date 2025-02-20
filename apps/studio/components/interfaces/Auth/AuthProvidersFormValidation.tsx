@@ -1359,19 +1359,19 @@ const PROVIDER_SAML = {
         'You will need to use the [Supabase CLI](https://supabase.com/docs/guides/auth/sso/auth-sso-saml#managing-saml-20-connections) to set up SAML after enabling it',
       type: 'boolean',
     },
-    SAML_EXTERNAL_URL: {
-      title: 'SAML metadata URL',
-      description:
-        'You may use a different SAML metadata URL from what is defined with the API External URL. Please validate that your SAML External URL can reach the Custom Domain or Project URL.',
-      descriptionOptional: 'Optional',
-      type: 'string',
-    },
     SAML_ALLOW_ENCRYPTED_ASSERTIONS: {
       title: 'Allow encrypted SAML Assertions',
       description:
         'Some SAML Identity Providers require support for encrypted assertions. Usually this is not necessary.',
       descriptionOptional: 'Optional',
       type: 'boolean',
+    },
+    SAML_EXTERNAL_URL: {
+      title: 'SAML External URL',
+      description:
+        'Use only when you have set up a [custom domain or vanity domains](/docs/guides/platform/custom-domains#prepare-to-activate-your-domain) to keep the SAML EntityID bound to the project identifier instead of the custom domain.',
+      descriptionOptional: 'Custom or Vanity Domains Only',
+      type: 'string',
     },
   },
   validationSchema: object().shape({
