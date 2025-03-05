@@ -2325,7 +2325,6 @@ export interface components {
       saml?: components['schemas']['SamlDescriptor']
       updated_at?: string
     }
-<<<<<<< HEAD
     UpdateSigningKeyBody: {
       /** @enum {string} */
       status: 'in_use' | 'previously_used' | 'revoked' | 'standby'
@@ -2388,8 +2387,6 @@ export interface components {
       file_size_limit: number
       public: boolean
     }
-=======
->>>>>>> afac5e0623 (update api types)
     UpdateStorageConfigBody: {
       features?: components['schemas']['StorageFeatures']
       /** Format: int64 */
