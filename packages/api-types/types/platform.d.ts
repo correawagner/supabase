@@ -4457,6 +4457,8 @@ export interface components {
     CreateReplicationSinkBody: {
       /** @description BigQuery dataset id */
       dataset_id: string
+      /** @description Max staleness in minutes */
+      max_staleness_mins: number
       /** @description BigQuery project id */
       project_id: string
       /** @description BigQuery service account key */
@@ -6363,6 +6365,7 @@ export interface components {
       config: {
         big_query: {
           dataset_id: string
+          max_staleness_mins: number
           project_id: string
           service_account_key: string
         }
@@ -6376,6 +6379,7 @@ export interface components {
         config: {
           big_query: {
             dataset_id: string
+            max_staleness_mins: number
             project_id: string
             service_account_key: string
           }
@@ -7172,6 +7176,8 @@ export interface components {
     UpdateReplicationSinkBody: {
       /** @description BigQuery dataset id */
       dataset_id: string
+      /** @description Max staleness in minutes */
+      max_staleness_mins: number
       /** @description BigQuery project id */
       project_id: string
       /** @description BigQuery service account key */
