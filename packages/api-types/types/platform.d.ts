@@ -2746,6 +2746,25 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/platform/projects/{ref}/notifications/advisor/exceptions': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** List advisor notification exceptions */
+    get: operations['ProjectAdvisorNotificationsController_listNotificationExceptions']
+    put?: never
+    /** Create advisor notification exceptions */
+    post: operations['ProjectAdvisorNotificationsController_createNotificationExceptions']
+    /** Deletes advisor notification exceptions */
+    delete: operations['ProjectAdvisorNotificationsController_deleteNotificationExceptions']
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/platform/projects/{ref}/pause': {
     parameters: {
       query?: never
@@ -4252,6 +4271,56 @@ export interface components {
       role_id: number
       role_scoped_projects?: string[]
     }
+    CreateNotificationExceptionsDto: {
+      exceptions: {
+        /** Format: uuid */
+        assigned_to?: string
+        is_disabled: boolean
+        /** @enum {string} */
+        lint_category?: 'ALL' | 'PERFORMANCE' | 'SECURITY'
+        /** @enum {string} */
+        lint_name?:
+          | 'ssl_not_enforced'
+          | 'network_restrictions_not_set'
+          | 'pitr_not_enabled'
+          | 'password_requirements_min_length'
+          | 'unindexed_foreign_keys'
+          | 'auth_users_exposed'
+          | 'auth_rls_initplan'
+          | 'no_primary_key'
+          | 'unused_index'
+          | 'multiple_permissive_policies'
+          | 'policy_exists_rls_disabled'
+          | 'rls_enabled_no_policy'
+          | 'duplicate_index'
+          | 'security_definer_view'
+          | 'function_search_path_mutable'
+          | 'rls_disabled_in_public'
+          | 'extension_in_public'
+          | 'rls_references_user_metadata'
+          | 'materialized_view_in_api'
+          | 'foreign_table_in_api'
+          | 'unsupported_reg_types'
+        note?: string
+      }[]
+    }
+    CreateNotificationExceptionsResponseDto: {
+      exceptions: {
+        /** Format: uuid */
+        assigned_to: string | null
+        /** Format: uuid */
+        id: string
+        /** Format: date-time */
+        inserted_at: string
+        is_disabled: boolean
+        /** Format: uuid */
+        last_updated_by: string
+        lint_category: string | null
+        lint_name: string | null
+        note: string | null
+        project_id: number
+      }[]
+    }
     CreateOAuthAppBody: {
       icon?: string
       name: string
@@ -4388,6 +4457,8 @@ export interface components {
     CreateReplicationSinkBody: {
       /** @description BigQuery dataset id */
       dataset_id: string
+      /** @description Max staleness in minutes */
+      max_staleness_mins: number
       /** @description BigQuery project id */
       project_id: string
       /** @description BigQuery service account key */
@@ -5378,6 +5449,23 @@ export interface components {
       primary_email: string | null
       username: string
     }
+    ListNotificationExceptionsResponseDto: {
+      exceptions: {
+        /** Format: uuid */
+        assigned_to: string | null
+        /** Format: uuid */
+        id: string
+        /** Format: date-time */
+        inserted_at: string
+        is_disabled: boolean
+        /** Format: uuid */
+        last_updated_by: string
+        lint_category: string | null
+        lint_name: string | null
+        note: string | null
+        project_id: number
+      }[]
+    }
     LoadBalancerDatabase: {
       identifier: string
       status: string
@@ -6277,6 +6365,7 @@ export interface components {
       config: {
         big_query: {
           dataset_id: string
+          max_staleness_mins: number
           project_id: string
           service_account_key: string
         }
@@ -6290,6 +6379,7 @@ export interface components {
         config: {
           big_query: {
             dataset_id: string
+            max_staleness_mins: number
             project_id: string
             service_account_key: string
           }
@@ -6544,6 +6634,7 @@ export interface components {
       width?: number
     }
     SupavisorConfigResponse: {
+      connection_string: string
       connectionString: string
       /** @enum {string} */
       database_type: 'PRIMARY' | 'READ_REPLICA'
@@ -7085,6 +7176,8 @@ export interface components {
     UpdateReplicationSinkBody: {
       /** @description BigQuery dataset id */
       dataset_id: string
+      /** @description Max staleness in minutes */
+      max_staleness_mins: number
       /** @description BigQuery project id */
       project_id: string
       /** @description BigQuery service account key */
@@ -7129,8 +7222,8 @@ export interface components {
     }
     UpdateSupavisorConfigResponse: {
       default_pool_size: number | null
-      /** @enum {string} */
-      pool_mode: 'transaction' | 'session'
+      /** @enum {number} */
+      pool_mode: never
     }
     UpdateTableBody: {
       comment?: string
@@ -14944,6 +15037,7 @@ export interface operations {
           | 'total_storage_delete_requests'
           | 'total_storage_options_requests'
           | 'total_storage_patch_requests'
+          | 'total_logdrain_egress'
         endDate: string
         interval: string
         startDate: string
@@ -15341,6 +15435,94 @@ export interface operations {
         content: {
           'application/json': components['schemas']['LoadBalancerDetailResponse'][]
         }
+      }
+    }
+  }
+  ProjectAdvisorNotificationsController_listNotificationExceptions: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        ref: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ListNotificationExceptionsResponseDto']
+        }
+      }
+      /** @description Failed to retrieve advisor notification exceptions */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  ProjectAdvisorNotificationsController_createNotificationExceptions: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        ref: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateNotificationExceptionsDto']
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['CreateNotificationExceptionsResponseDto']
+        }
+      }
+      /** @description Failed to creare advisor notification exceptions */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  ProjectAdvisorNotificationsController_deleteNotificationExceptions: {
+    parameters: {
+      query: {
+        ids: string[]
+      }
+      header?: never
+      path: {
+        ref: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Failed to delete advisor notification exceptions */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
       }
     }
   }
