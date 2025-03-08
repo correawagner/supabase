@@ -526,6 +526,7 @@ services:
   supabase-mail:
     container_name: supabase-mail
     image: mailhog/mailhog:v1.0.1
+    platform: linux/amd64
     restart: unless-stopped
     ports:
       - "1025:1025"
