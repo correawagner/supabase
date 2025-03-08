@@ -525,12 +525,15 @@ services:
 
   supabase-mail:
     container_name: supabase-mail
-    image: mailhog/mailhog:v1.0.1
-    platform: linux/amd64
+    image: axllent/mailpit:v1.23
     restart: unless-stopped
+    volumes:
+      - ./volumes/mail:/data
     ports:
       - "1025:1025"
       - "8025:8025"
+    environment:
+      - TZ=UTC
 
 volumes:
   db-config:
