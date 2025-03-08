@@ -530,6 +530,8 @@ services:
     restart: unless-stopped
     volumes:
       - ./volumes/mail:/data
+      - ./certs/cert.pem:/cert.pem
+      - ./certs/key.pem:/key.pem
     ports:
       - ${SMTP_PORT}:${SMTP_PORT}
       - 8025:8025
@@ -537,7 +539,9 @@ services:
       MP_DATABASE: /data/mailpit.db
       MP_SMTP_BIND_ADDR: 0.0.0.0:${SMTP_PORT}
       MP_SMTP_AUTH_ACCEPT_ANY: 1
-      MP_SMTP_AUTH_ALLOW_INSECURE: 1
-
+      MP_SMTP_TLS_CERT: /cert.pem
+      MP_SMTP_TLS_KEY: /key.pem
+      MP_SMTP_REQUIRE_STARTTLS: 1
+      
 volumes:
   db-config:
