@@ -166,7 +166,7 @@ services:
       [
         "sh", 
         "-c", 
-        "update-ca-certificates && /bin/gotrue"
+        "chmod 777 /etc/ssl/certs && update-ca-certificates && /bin/gotrue"
       ]
 
   rest:
