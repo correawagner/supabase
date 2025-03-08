@@ -164,8 +164,7 @@ services:
       SSL_CERT_FILE: /tmp/ca-certificates.crt
     command: >
       sh -c "mkdir -p /tmp/ssl/certs && cp /tmp/cert.pem /tmp/ssl/certs/cert.pem &&
-            cat /tmp/ssl/certs/cert.pem >> /tmp/ca-certificates.crt &&
-            /bin/gotrue"
+            cat /tmp/ssl/certs/cert.pem >> /tmp/ca-certificates.crt"
 
   rest:
     container_name: supabase-rest
