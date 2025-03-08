@@ -530,10 +530,11 @@ services:
     volumes:
       - ./volumes/mail:/data
     ports:
-      - ${SMTP_PORT}:1025
+      - ${SMTP_PORT}:${SMTP_PORT}
       - 8025:8025
     environment:
       MP_DATABASE: /data/mailpit.db
+      MP_SMTP_BIND_ADDR: 0.0.0.0:${SMTP_PORT}
       MP_SMTP_AUTH_ACCEPT_ANY: 1
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
 
