@@ -1,0 +1,5 @@
+FROM supabase/gotrue:v2.169.0
+
+USER root
+RUN chmod 755 /etc/ssl/certs
+USER supabase
