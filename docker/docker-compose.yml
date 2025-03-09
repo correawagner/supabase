@@ -79,13 +79,10 @@ services:
 
   auth:
     container_name: supabase-auth
-    build:
-      context: .
-      dockerfile: Dockerfile.gotrue
+    image: supabase/gotrue:v2.169.0
     restart: unless-stopped
     volumes:
-      - ./certs/cert.pem:/usr/local/share/ca-certificates/cert.pem:rw
-      - ./certs/ca-certificates:/etc/ssl/certs:rw
+      - ./certs/cert.pem:/tmp/cert.pem:rw
     healthcheck:
       test:
         [
@@ -168,7 +165,7 @@ services:
       [
         "sh",
         "-c",
-        "update-ca-certificates && exec auth"
+        "mkdir -p /tmp/ssl/certs && cp /tmp/cert.pem /tmp/ssl/certs/cert.pem && cat /tmp/ssl/certs/cert.pem >> /tmp/ca-certificates.crt && exec auth"
       ]
 
   rest:
